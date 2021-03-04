@@ -200,9 +200,7 @@ Luke와 Vader은 타입이 다르지만 어노테이션을 사용하여 타입�
 
 # spring 3일차
 
-목표 :  
-1. XML제거  
-2. 서버를 실행 하지 않고 테스트 코드를 이용하여 데이터 코드를 내보낸다.
+목표: 서버를 실행 하지 않고 테스트 코드를 이용하여 데이터를 내보낸다.
 
 * spring mvc  
   
@@ -310,3 +308,194 @@ TimeMapperTests.java
 	@Autowired
 	TimeMapper timeMapper;
 ```
+
+* 웹 테스트  
+
+이제 웹에서 테스트를 하기전에 알아두어야 할 것이 있다  
+웹테스트는 다른 테스트와 달리 써야하는 어노테이션인 @WebAppConfiguration이 있고 @ContextConfiguration에 넣어줄 경로 "file:src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml"를 추가 해야 한다.
+```
+	@ContextConfiguration({"file:src/main/webapp/WEB-INF/spring/root-context.xml",
+			       "file:src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml"})
+	@WebAppConfiguration
+```
+테스트 해보는 코드를 만들땐 MockMvc를 사용한다.
+```
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration({"file:src/main/webapp/WEB-INF/spring/root-context.xml",
+		       "file:src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml"})
+@Log4j
+@WebAppConfiguration
+public class SampleControllerTests {
+
+	@Autowired
+	WebApplicationContext ctx;
+	MockMvc mockMvc;
+	
+	@Before
+	public void setup() {
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(ctx).build();
+		log.info("setup......");
+	}
+	
+	@Test
+	public void test1() {
+		log.info(ctx);
+		log.info(mockMvc);
+	}
+	
+	@Test
+	public void testDoA() throws Exception{
+		mockMvc.perform(MockMvcRequestBuilders.get("/sample/doA"));
+	}	
+}
+
+```
+서버를 직접 켜서 테스트 하는것보다 속도면에서 월등히 빠르지만 '한글' 지원이 불안정하다.
+
+* TodoController
+지금까지를 응용하여 todo를 만들어 보자
+
+1. TodoDTO.java
+```
+package org.zerock.dto;
+
+import lombok.Data;
+
+@Data
+public class TodoDTO {
+	private Integer tno;
+	private String title;
+	private boolean complete;
+}
+```
+2. TodoController.java 기본동작 설계
+```
+package org.zerock.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.zerock.dto.TodoDTO;
+
+import lombok.extern.log4j.Log4j;
+
+@Controller
+@RequestMapping("/todo")
+@Log4j
+public class TodoController {
+
+	@GetMapping("/add")
+	public void add() {
+		log.info("get........");
+	}
+	@PostMapping("/add")
+	public String addPost(TodoDTO todoDTO) {
+		log.info(todoDTO);
+		return "redirect:/todo/list";
+	}
+	@GetMapping("/list")
+	public void list() {
+		log.info("list........");
+	}
+}
+```
+3. TodoController.java 테스트  
+AbstractControllerTests.java
+```
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration({"file:src/main/webapp/WEB-INF/spring/root-context.xml",
+		       "file:src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml"})
+@Log4j
+@WebAppConfiguration
+public class AbstractControllerTests {88
+
+	@Autowired
+	WebApplicationContext ctx;
+	MockMvc mockMvc;
+	
+	@Before
+	public void setup() {
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(ctx).build();
+		log.info("setup......");
+	}	
+}
+
+```
+TodoControllerTests.java
+```
+@Log4j
+public class TodoControllerTests extends AbstractControllerTests {
+	@Test
+	public void test1() throws Exception {
+		log.info(mockMvc);
+		mockMvc.perform(MockMvcRequestBuilders.post("/todo/add")
+				.param("title","Sample....")
+				.param("complete", "true"));
+	}
+	
+}
+```
+
+4. entity객체를 만든다
+```
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Todo {
+
+	private Integer tno;
+	private String title;
+	private boolean complete;
+	private Date regdate;
+}
+```
+
+5. TodoMapper <I>를 만듦
+```
+public interface TodoMapper {
+	
+	@Insert("insert into tbl_todo (title, complete) values(#{title},#{complete})")
+	void insert(Todo todo);
+	
+}
+```
+
+6. TodoMapperTests에서 테스트함
+```
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
+@Log4j
+public class TodoMapperTests {
+
+	@Autowired
+	TodoMapper mapper;
+	
+	@Test
+	public void testInsert() {
+		
+		//i = 1~100
+		IntStream.rangeClosed(1, 100)
+		//i에 대해서{}를 실행하라
+		.forEach(i -> {
+			Todo todo = Todo.builder().title("t"+i).build();
+			mapper.insert(todo);
+		});
+	}
+}
+```
+7. TodoController 동작하게끔 수정
+```
+@PostMapping("/add")
+	public String addPost(TodoDTO todoDTO) {
+		log.info(todoDTO);
+		
+		Todo todo = Todo.builder().title(todoDTO.getTitle()).complete(todoDTO.isComplete()).build();
+		
+		mapper.insert(todo);
+		
+		return "redirect:/todo/list";
+	}
+```
+8. TodoControllerTests에서 테스트 후 DB확인
