@@ -408,7 +408,7 @@ AbstractControllerTests.java
 		       "file:src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml"})
 @Log4j
 @WebAppConfiguration
-public class AbstractControllerTests {88
+public class AbstractControllerTests {
 
 	@Autowired
 	WebApplicationContext ctx;
