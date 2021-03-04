@@ -1,11 +1,6 @@
-INDEX VERSION 1.4+C:\Users\nsw10\Documents\stsws\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
-4199944652.index
-4090870210.index
-3270264938.index
-196491561.index
-3117563906.index
-1132003215.index
-2370904410.index
-3475711177.index
-3107046575.index
-1306643758.index
+INDEX VERSION 1.4+C:\Users\nsw10\Documents\stsws\spring_study\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+2514512380.index
+322286841.index
+2868350775.index
+52030643.index
+2539194176.index
