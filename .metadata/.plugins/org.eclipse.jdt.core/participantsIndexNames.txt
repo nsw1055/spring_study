@@ -1,0 +1,9 @@
+INDEX VERSION 1.131
+C:\Users\nsw10\Documents\stsws\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\2238588849.index
+\0302_2\src\main\java
+C:\Users\nsw10\Documents\stsws\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1302271838.index
+\0303\src\main\java
+C:\Users\nsw10\Documents\stsws\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1306059606.index
+\s1\src\main\java
+C:\Users\nsw10\Documents\stsws\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1132003215.index
+\0302\src\main\java

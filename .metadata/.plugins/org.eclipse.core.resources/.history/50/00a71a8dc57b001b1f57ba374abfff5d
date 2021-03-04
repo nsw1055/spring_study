@@ -1,0 +1,19 @@
+package org.zerock.dao;
+
+import org.junit.Test;
+
+import lombok.extern.log4j.Log4j;
+
+@Log4j
+public class JDBCTest {
+	
+	@Test
+	public void testConnection() throws Exception {
+		
+//		JDBC 드라이버 확인
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		
+		log.info("1------------------------");
+	}
+	
+}

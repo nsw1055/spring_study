@@ -1,0 +1,4 @@
+#Tomcat publish data
+#Tue Mar 02 15:22:19 KST 2021
+org.eclipse.jst.jee.server\:0302=C\:\\sts-bundle\\pivotal-tc-server\\instances\\base-instance\\wtpwebapps\\0302
+org.eclipse.jst.jee.server\:/binary\:C\:\\Users\\nsw10\\.m2\\repository\\org\\springframework\\spring-web\\5.3.3\\spring-web-5.3.3.jar=C\:\\sts-bundle\\pivotal-tc-server\\instances\\base-instance\\wtpwebapps\\0302\\WEB-INF\\lib\\spring-web-5.3.3.jar
