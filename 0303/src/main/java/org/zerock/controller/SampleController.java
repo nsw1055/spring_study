@@ -19,7 +19,7 @@ public class SampleController {
 	@RequestMapping("/doA")
 	public void doA(Model model) {
 		log.info("doA.....");
-		String now = timeMapper.getTime2();
+		String now = timeMapper.getTime();
 		log.info(now);
 		model.addAttribute("time", now); //request.setAttribute와 같다
 	}
