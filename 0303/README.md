@@ -452,7 +452,7 @@ public class Todo {
 }
 ```
 
-5. TodoMapper <I>를 만듦
+5. TodoMapper interface를 만듦
 ```
 public interface TodoMapper {
 	
