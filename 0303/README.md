@@ -507,6 +507,8 @@ public class TodoMapperTests {
 DTO와 VO는 겉으로보면 비슷하지만 성격이 다르다
 다음 표를 보도록 하자  
   
+  ![image](https://user-images.githubusercontent.com/72544949/110078271-d5df9e80-7dca-11eb-90fe-1bd3388145dc.png)
+  
   
 * 화면설계의 문제  
 
