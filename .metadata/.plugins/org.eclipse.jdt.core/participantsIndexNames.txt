@@ -11,5 +11,7 @@ C:\Users\nsw10\Documents\stsws\.metadata\.plugins\org.eclipse.jst.jsp.core\jspse
 \0303\src\main\java
 C:\Users\nsw10\Documents\stsws\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1306059606.index
 \s1\src\main\java
+C:\Users\nsw10\Documents\stsws\spring_study\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\3120458850.index
+\0303\src\main\java
 C:\Users\nsw10\Documents\stsws\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1132003215.index
 \0302\src\main\java
