@@ -887,7 +887,7 @@ TodoController.java
 @GetMapping({"/add", "/add2"})
 public void add() {
 	log.info("get........");
-}
+} 
 
 @PostMapping("/add2")
 public String add2Post(@Valid TodoDTO todoDTO, BindingResult result, RedirectAttributes rttr) {
