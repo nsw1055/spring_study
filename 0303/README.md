@@ -554,6 +554,25 @@ add.jsp
 
 위의 코드를 짜면 한글이 깨지는 문제와 complete가 null이 되어 전송을 못하는 문제가 생긴다.  
 이 문제는 기본자료형을 사용하여 생긴 문제로 어제의 코드를 조금 수정 해 주었다.
+WEB.XML(한글깨짐문제)
+```
+<filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>
+            org.springframework.web.filter.CharacterEncodingFilter
+    </filter-class>
+    <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+</filter>
+<filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+
 Todo.java , TodoDTO.java
 ```
 private Boolean complete;
@@ -828,12 +847,12 @@ list.jsp
 </html>
 ```
 
-* validation
+* validation  
 validation이란 어떤 데이터의 값이 유효한지, 타당한지 확인하는 것을 의미한다.
 예를들어 이메일 주소 양식은 admin@example.com인데, 회원 가입을 할 때 이메일 양식이 일치하지 않으면 유효하지 않은 이메일이므로 회원 가입을 막을 수 있다.  
 개발이 끝난 뒤에 사용하는것을 추천 한다.  
 
-(1)
+(1)  
 TodoController.java
 ```
 @PostMapping("/add")
@@ -862,7 +881,7 @@ public class TodoDTO {
 }
 ```
   
-(2) Ajax
+(2) Ajax  
 TodoController.java
 ```
 @GetMapping({"/add", "/add2"})
