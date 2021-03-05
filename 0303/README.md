@@ -647,7 +647,7 @@ public String addPost(TodoDTO todoDTO, RedirectAttributes rttr) {
 		
 	rttr.addFlashAttribute("msg", "success");
 		
-	return "redirect:/todo/list?msg=success";
+	return "redirect:/todo/list";
 }
 ```
 list.jsp
