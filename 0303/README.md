@@ -499,3 +499,138 @@ public class TodoMapperTests {
 	}
 ```
 8. TodoControllerTests에서 테스트 후 DB확인
+
+# 스프링 4일차
+
+* DTO/VO
+
+DTO와 VO는 겉으로보면 비슷하지만 성격이 다르다
+다음 표를 보도록 하자  
+  
+  
+* 화면설계의 문제  
+
+1. post로 보내고 처리한 후에 결과페이지로 갈때 redirect:URL을 사용해 이동하는 방법
+
+add.jsp
+```
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<form action = "/todo/add" method="post">
+	<div>
+		<input type = 'text' name = 'title'>
+	</div>
+	<div>
+		<button class = "btn">SAVE</button>
+	</div>
+</form>
+
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+  <script>
+  $(document).ready(function () {
+	$(".btn").on("click", function(e){
+		e.preventdefault();
+		$('form').submit();
+	})
+})
+  
+  </script>
+</body>
+</html>
+```
+
+
+위의 코드를 짜면 한글이 깨지는 문제와 complete가 null이 되어 전송을 못하는 문제가 생긴다.  
+이 문제는 기본자료형을 사용하여 생긴 문제로 어제의 코드를 조금 수정 해 주었다.
+Todo.java , TodoDTO.java
+```
+private Boolean complete;
+```
+  
+TodoController.java
+```
+Todo todo = Todo.builder().title(todoDTO.getTitle()).complete(todoDTO.getComplete()).build();
+```
+
+
+
+
+
+2. iframe을 사용하면 iframe안에서 밖의 홈페이지를 호출하여 사용자는 같은 화면에서 작업을 할 수 있다.
+
+add.jsp
+```
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<form action = "/todo/add" method="post" target = 'zero'>
+	<div>
+		<input type = 'checkbox' name = 'complete'>
+		<input type = 'text' name = 'title'>
+	</div>
+	<div>
+		<button class = "btn">SAVE</button>
+	</div>
+</form>
+
+<iframe name = 'zero'></iframe>
+
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+  <script>
+  
+  function showResult(){
+	  alert("showResult")
+	  self.location="/todo/list"
+  }
+  
+  $(document).ready(function () {
+	$(".btn").on("click", function(e){
+		e.preventdefault()
+		$('form').submit()
+	})
+})
+  
+  </script>
+</body>
+</html>
+```
+TodoController.java
+```
+@PostMapping("/add")
+	public String addPost(TodoDTO todoDTO) {
+		log.info(todoDTO);
+		
+		return "/todo/addResult";
+	}
+```
+addResult.jsp
+```
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<script>
+
+parent.showResult()
+
+</script>
+```
+
+4. Ajax처리 iframe과 같지만 iframe은 비동기방식이고 Ajax는 동기방식으로 조금 더 신경 써야 한다.
