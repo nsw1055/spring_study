@@ -563,7 +563,83 @@ Todo todo = Todo.builder().title(todoDTO.getTitle()).complete(todoDTO.getComplet
 ```
 
 
+1-1 RedirectAttributes
+(1) RedirectAttributes가 적용 안 된 상황  
+TodoController.java
+```
+@PostMapping("/add")
+	public String addPost(TodoDTO todoDTO) {
+		log.info(todoDTO);		
+		return "redirect:/todo/list?msg=success";
+	}
+```
+list.jsp
+```
+<script>
+const msg = '${param.msg}'
 
+</script>
+```
+
+add.jsp
+```
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<form action = "/todo/add" method="post" target = 'zero'>
+	<div style ="margin: 10px">
+		<input type = 'checkbox' name = 'complete'>
+		<input type = 'text' name = 'title'>
+		<button class = "btn">SAVE</button>
+	</div>
+</form>
+
+
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+  <script>
+  
+  function showResult(){
+	  alert("showResult")
+	  self.location="/todo/list"
+  }
+  
+  $(document).ready(function () {
+})
+  
+```
+위의 코드들은 list까지는 정상작동 하지만 list페이지에서 새로고침을 하면 alert창이 뜨는 오류가 있다 이것을 막기위해 
+(2) 사용
+TodoController.java
+```
+@PostMapping("/add")
+public String addPost(TodoDTO todoDTO, RedirectAttributes rttr) {
+	log.info(todoDTO);		
+		
+	rttr.addFlashAttribute("msg", "success");
+		
+	return "redirect:/todo/list?msg=success";
+}
+```
+list.jsp
+```
+<script>
+const msg = '${msg}'
+
+if(msg === 'success'){
+	alert("성공")
+}
+</script>
+```
+위의 코드를 사용하면 새로고침시에 alert창이 뜨지 않는다.(다만 뒤로가기의 문제가 남는다.)
 
 
 2. iframe을 사용하면 iframe안에서 밖의 홈페이지를 호출하여 사용자는 같은 화면에서 작업을 할 수 있다.
@@ -750,3 +826,63 @@ list.jsp
 </html>
 ```
 
+* validation
+validation이란 어떤 데이터의 값이 유효한지, 타당한지 확인하는 것을 의미한다.
+예를들어 이메일 주소 양식은 admin@example.com인데, 회원 가입을 할 때 이메일 양식이 일치하지 않으면 유효하지 않은 이메일이므로 회원 가입을 막을 수 있다.  
+개발이 끝난 뒤에 사용하는것을 추천 한다.  
+
+(1)
+TodoController.java
+```
+@PostMapping("/add")
+public String addPost(@Valid TodoDTO todoDTO, BindingResult result, RedirectAttributes rttr) {
+	log.info(todoDTO);				
+	//검증실패		
+	if(result.hasErrors()) {
+		log.info("has errors" + result);
+		return "/todo/add";
+	}
+	rttr.addFlashAttribute("msg", "success");
+	return "redirect:/todo/list?msg=success";
+}
+```
+TodoDTO.java
+```
+@Data
+public class TodoDTO {
+
+	private Integer tno;
+	
+	@NotEmpty
+	@Length(min = 5, max = 10)
+	private String title;
+	private Boolean complete;                                                                                                                                 
+}
+```
+  
+(2) Ajax
+TodoController.java
+```
+@GetMapping({"/add", "/add2"})
+public void add() {
+	log.info("get........");
+}
+
+@PostMapping("/add2")
+public String add2Post(@Valid TodoDTO todoDTO, BindingResult result, RedirectAttributes rttr) {
+	log.info(todoDTO);		
+		
+	//검증실패
+	if(result.hasErrors()) {
+		log.info("has errors" + result);
+		return "/todo/add";
+	}
+		
+	return "redirect:/todo/list?msg=success";
+}
+	
+```
+add2.jsp
+```
+
+```
