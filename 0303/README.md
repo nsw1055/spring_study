@@ -539,7 +539,7 @@ add.jsp
   <script>
   $(document).ready(function () {
 	$(".btn").on("click", function(e){
-		e.preventdefault();
+		e.preventDefault();
 		$('form').submit();
 	})
 })
@@ -604,7 +604,7 @@ add.jsp
   
   $(document).ready(function () {
 	$(".btn").on("click", function(e){
-		e.preventdefault()
+		e.preventDefault()
 		$('form').submit()
 	})
 })
@@ -633,4 +633,120 @@ parent.showResult()
 </script>
 ```
 
-4. Ajax처리 iframe과 같지만 iframe은 비동기방식이고 Ajax는 동기방식으로 조금 더 신경 써야 한다.
+3. Ajax처리 iframe과 같지만 iframe은 비동기방식이고 Ajax는 동기방식으로 조금 더 신경 써야 한다.(가장 많이 사용)  
+<form></form> -> 1. 기본 동작을 막는다 preventdefault()
+		 2. 수집후 -> 객체 리터럴
+		 3. Ajax post 방식 - callback
+
+```
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<form action = "/todo/add" method="post" target = 'zero'>
+	<div style ="margin: 10px">
+		<input type = 'checkbox' name = 'complete'>
+		<input type = 'text' name = 'title'>
+		<button class = "btn">SAVE</button>
+	</div>
+</form>
+
+
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+  <script>
+  
+  function showResult(){
+	  alert("showResult")
+	  self.location="/todo/list"
+  }
+  
+  $(document).ready(function () {
+	$(".btn").on("click", function(e){
+		e.preventDefault();
+		const data = {title:$("input[name='title']").val(), complete:false }
+		console.log(data);
+		$.post('/todo/add', data, function(result){
+			console.log(result);
+		})
+	})
+})
+  
+  </script>
+</body>
+</html>
+```
+TodoController
+```
+//				  mime타입 (단순 문자열을 반환)
+	@PostMapping(value = "/add", produces = "text/plain")
+	@ResponseBody
+	public String addPost(TodoDTO todoDTO) {
+		log.info(todoDTO);
+		
+		return "success";
+	}
+```
+		
+* Model  
+
+1. Model을 써야하는 경우
+ (1) 전달받은 데이터에는 사용하지 않는다.  
+ (2) 화면에 추가적인 데이터  
+ (3) Model파라미터 추가  
+ (4) 키,값  
+ (5) 질의  
+ (6)Redirect에서는 사용 할 수 없다.  
+
+2. ModelAttribute를 써야하는 경우
+ (1) 뷰(jsp)에 이름을 줘서 전달 할 경우 -> 들어올때부터 있었던 데이터  
+ (2) 기본자료형처럼 전달이 안되는 경우 명시적으로 사용
+
+3. RedirectAttributes(addFlashAttribute)
+ 세션에 저장되어 "한번만" 사용된후 삭제된다.(파라미터에 고정되지 않는다.)  
+ 
+TodoController.java
+```
+	@GetMapping("/list")
+	public void list(Model model) {
+		log.info("list........");
+		
+		List<TodoDTO> list = IntStream.rangeClosed(1, 10).mapToObj(i -> {
+			TodoDTO dto = new TodoDTO();
+			dto.setTno(i);
+			dto.setTitle("aaaa" + i);
+			return dto;
+		}).collect(Collectors.toList());
+		
+		model.addAttribute("list", list);
+	}
+```
+list.jsp
+```
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	${list }
+<ul>
+<c:forEach items="${list}" var="todoDTO">
+<li>${todoDTO }</li>
+</c:forEach>
+</ul>
+</body>
+</html>
+```
+
