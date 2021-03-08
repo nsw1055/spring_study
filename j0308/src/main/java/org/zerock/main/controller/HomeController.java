@@ -1,4 +1,4 @@
-package org.zerock.controller;
+package org.zerock.main.controller;
 
 import java.text.DateFormat;
 import java.util.Date;
