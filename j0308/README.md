@@ -390,4 +390,137 @@ public class TimeController {
 33. now.jsp생성  
 ![image](https://user-images.githubusercontent.com/72544949/110270605-8935d680-8009-11eb-8cfe-174e38b9b142.png)
 
+     
+34. board 패키지 생성
 
+35. BoardController.java 작성
+```
+@Controller
+@RequestMapping("/board")
+@Log4j
+public class BoardController {
+	
+	@GetMapping({"/", "/list"})
+	public String list() {
+		log.info("list.........................");
+		
+		return "/board/list";
+	}
+}
+```
+36. ServletConfig.java에서 ComponentScan등록  
+```
+@ComponentScan(basePackages = {"org.zerock.main", "org.zerock.time.controller", "org.zerock.board.controller"})
+```
+  
+37. views/board/list.jsp생성
+
+여기까지가 기본셋팅
+
+---
+
+* 게시판 
+1. DTO 개발 / VO 개발
+2. 서비스 계층 설계 (생략하는경우도 있음)
+3. Mapper 인터페이스 추가
+4. 테스트
+5. 서비스 계층에 주입
+6. 테스트
+
+* 작성 순서
+
+1. board 패키지 작성
+   (1) config
+   (2) domain
+   (3) dto
+   (4) mapper
+   
+2. domain/Board.java 작성
+```
+@Getter
+@AllArgsConstructor
+@Builder
+@NoArgsConstructor
+@ToString
+public class Board {
+	private Integer bno;
+	private String title, content, writer;
+	private Date regDate, updateDate;
+}
+```
+변경을 거의 하지 않아 생성자를 이용해 작성하고 getter를 사용해 읽는다.  
+
+3. dto/BoardDTO.java
+```
+@Data
+public class BoardDTO {
+	private Integer bno;
+	private String title, content, writer;
+	private Date regDate, updateDate;	
+}
+```
+getter와 setter에 자유롭다.
+
+4. service/BoardService.java (i) 작성
+```
+public interface BoardService {
+
+	default Board toDomain(BoardDTO dto) {
+		
+		return Board.builder().bno(dto.getBno())
+		.title(dto.getTitle())
+		.content(dto.getContent())
+		.writer(dto.getWriter())
+		.regDate(dto.getRegDate())
+		.updateDate(dto.getUpdateDate()).build();
+	}
+	
+}
+```
+
+5. mapper/BoardMapper
+```
+public interface BoardMapper {
+
+	@Select("select * from tbl_board order by bno desc limit 0,10")
+	List<Board> getList();
+	
+}
+```
+6. config/BoardConfig
+```
+@Configuration
+@MapperScan(basePackages = "org.zerock.board.mapper")
+@ComponentScan(basePackages = "org.zerock.board.service")
+public class BoardConfig {
+
+}
+
+```
+7. webConfig
+```
+@Override
+	protected Class<?>[] getRootConfigClasses() {
+		// TODO Auto-generated method stub
+		return new Class[] {CommonConfig.class,
+							TimeConfig.class,
+							BoardConfig.class};
+	}
+```
+8. test
+```
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {CommonConfig.class, TimeConfig.class, BoardConfig.class})
+@Log4j
+public class BoardTests {
+
+	@Autowired
+	BoardMapper mapper;
+	
+	@Test
+	public void testList() {
+		
+		mapper.getList().forEach(b -> log.info(b));
+	}
+}
+```
