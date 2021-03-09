@@ -1,4 +1,4 @@
-# 스프링 5일차
+# 스프링 5, 6일차
 
 * 게시판의 종류
 1. Form 태그 중심  
@@ -524,3 +524,262 @@ public class BoardTests {
 	}
 }
 ```
+
+---
+6일차  
+
+9. mapper수정
+```
+public interface BoardMapper {
+
+	@Select("select * from tbl_board order by bno desc limit #{skip}, #{count}")
+			  //#skip, #count를 사용할 수 있게 @Param을 사용
+	List<Board> getList(@Param("skip") int skip, @Param("count") int count);
+	
+}
+```
+
+10. /common/dto 패키지 설계
+11. /common/dto/PageDTO.java
+```
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class PageDTO {
+
+	@Builder.Default
+	private int page = 1;
+	@Builder.Default
+	private int perSheet = 10;
+
+	public int getSkip() {
+		return (page - 1) * perSheet;
+	}
+}
+```
+
+12. BoardService에 코드 추가
+```
+List<BoardDTO> getPageList(PageDTO pageDTO);
+```
+
+13. /board/service/BoardServiceImpl.java 작성
+```
+@Service
+@Log4j
+@RequiredArgsConstructor
+public class BoardServiceImpl implements BoardService {
+
+	private final BoardMapper mapper;
+	
+	@Override
+	public List<BoardDTO> getPageList(PageDTO pageDTO) {
+		
+		return mapper.getList(pageDTO.getSkip(), pageDTO.getPerSheet())
+				.stream().map(board -> {
+			BoardDTO dto = new BoardDTO();
+			dto.setBno(board.getBno());
+			dto.setTitle(board.getTitle());
+			dto.setContent(board.getContent());
+			dto.setWriter(board.getWriter());
+			dto.setRegDate(board.getRegDate());
+			dto.setUpdateDate(board.getUpdateDate());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+}
+```
+
+14. test
+```
+@Autowired
+	BoardService service;
+
+@Test
+	public void testList2() {
+		service.getPageList(PageDTO.builder().page(2).build())
+		.forEach(dto -> log.info(dto));
+	}
+```
+
+15. BoardMapper.XML 작성
+```
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zerock.board.mapper.BoardMapper">
+	<select id = "getTotalCount" resultType="int">
+		select count(bno) from tbl_board 
+	</select>
+</mapper>
+```
+
+16. BoardMapper.java 코드 추가
+```
+int getTotalCount();
+```
+
+17. BoardService.java
+```
+int getTotalCount();
+```
+
+18.BoardServiceImpl.java
+```
+@Override
+	public int getTotalCount() {
+		// TODO Auto-generated method stub
+		return mapper.getTotalCount();
+	}
+```
+
+19. BoardController.java
+```
+@Controller
+@RequestMapping("/board")
+@Log4j
+@RequiredArgsConstructor
+public class BoardController {
+	
+	private final BoardService service;
+	
+	@GetMapping({"/", "/list"})
+	public String list(@ModelAttribute("pageDTO") PageDTO pageDTO, Model model) {
+		log.info("list.........................");
+		
+		model.addAttribute("list", service.getPageList(pageDTO));
+		model.addAttribute("totalCount", service.getTotalCount());
+		//mockMVC
+		return "/board/list";
+	}
+}
+```
+
+20. /common/dto/pageMaker.java
+```
+package org.zerock.common.dto;
+
+import lombok.Getter;
+import lombok.ToString;
+
+@Getter
+@ToString
+public class PageMaker {
+
+	private boolean prev;
+	private boolean next;
+	private int start;
+	private int end;
+	private PageDTO pageInfo;
+	private int total;
+	
+	public PageMaker(PageDTO pageInfo, int total) {
+		
+		this.total = total;
+		this.pageInfo = pageInfo;
+		
+		//현재 페이지 번호
+		int currentPage = pageInfo.getPage();
+		
+		//임시 마지막 번호
+		int tempEnd = (int)(Math.ceil(currentPage/10.0)*10);
+		
+		//시작페이지
+		this.start = tempEnd - 9;
+
+		//진짜 마지막 페이지
+		int realEnd = (int)(Math.ceil(total / 10.0));
+		
+		end = realEnd < tempEnd ? realEnd : tempEnd; 
+		
+		prev = start > 1;
+		
+//		if(end*10 < total) {
+//			next = true;
+//		}else {
+//			next = false;
+//		}
+		next = end*10 < total;
+	}
+}
+```
+21. BoardController
+```
+model.addAttribute("pageMaker", new PageMaker(pageDTO, service.getTotalCount()));
+```
+
+--
+Ajax
+
+1. pom.xml에 validation-api, hibernate-validator, jackson-databind 추가
+2. BoardController.java 코드 추가
+```
+	@GetMapping("/register")
+	public void register() {
+		
+	}
+	
+	@PostMapping(value = "/register", produces = {"text/plain"})
+	@ResponseBody
+	//						@RequestBody: json데이터를 java의 객체로 변경해 주는 어노테이션
+	public String registerPost(@RequestBody @Valid BoardDTO dto, BindingResult result) {
+		
+		log.info(dto);
+		
+		if(result.hasErrors()) {
+			log.info(result.getAllErrors());
+			
+			return "fail";
+		}
+		
+		return "success";
+	}
+```
+3. register.jsp생성
+```
+<div class="modal" id ="registerModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Modal body text goes here.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    function sendAjax(data){
+        console.log("sendAjax....", data);
+
+        return fetch("/board/register", 
+        		{method:"post",
+        		headers:{'Content-Type':'application/json'},
+            	body: JSON.stringify(data)})
+            .then(res => res.text())
+    }
+    const  data = {title:"한글제목", content:"게시물 내용", writer:'user00'};
+
+    const fnResult = sendAjax(data);
+
+    fnResult.then(result=>{
+    	console.log("RESULT:" + result)
+    	$("#registerModal").modal('show')
+    })
+</script>
+
+<h3>${pageMaker }</h3>
+```
+
