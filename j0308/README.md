@@ -782,4 +782,260 @@ Ajax
 
 <h3>${pageMaker }</h3>
 ```
+4. ResponseEntity -> BoardController.java
+```
+@PostMapping(value = "/register", produces = {"text/plain"})
+@ResponseBody										
+public ResponseEntity<String> registerPost(@RequestBody @Valid BoardDTO dto, BindingResult result) {
+	
+	log.info(dto);
+	
+	if(result.hasErrors()) {
+		log.info(result.getAllErrors());
+		
+		return new ResponseEntity<String>("fail", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	return new ResponseEntity<String>("success", HttpStatus.OK);
+}
+```
 
+5. register.jsp 코드 수정
+```
+
+<div class="modal" id="registerModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Modal title</h5>
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p>Modal body text goes here.</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary">Save changes</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="movePage()">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+function movePage() {
+    self.location="/board/list"
+}
+
+    function sendAjax(data){
+        console.log("sendAjax....", data);
+
+        return fetch("/board/register", 
+        		{method:"post",
+        		headers:{'Content-Type':'application/json'},
+            	body: JSON.stringify(data)})
+            .then(res => {
+            if(!res.ok){
+                throw new Error(res)
+                return;
+            }
+            return res.text()
+        })
+            .catch(res => {
+            console.log("catch............................")
+            console.log(res)
+        })
+    }
+    const  data = {title:"한글제목", content:"게시물 내용", writer:"user00"};
+
+    const fnResult = sendAjax(data);
+
+    fnResult.then(result=>{
+    	console.log("RESULT:" + result)
+    	$("#registerModal").modal('show')
+    })
+</script>
+```
+
+6. pagenation처리
+```
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<%@include file="../includes/header.jsp" %>
+
+                    <!-- Page Heading -->
+                    <h1 class="h3 mb-4 text-gray-800">List Page</h1>
+                    
+
+
+<h3>${pageMaker}</h3>
+
+<ul class="pagination">
+   <c:if test="${pageMaker.prev}">
+    <li class="page-item">
+      <a class="page-link" href="${pageMaker.start - 1}" tabindex="-1">Previous</a>
+    </li>
+    </c:if>
+    
+    <c:forEach begin="${pageMaker.start }" end="${pageMaker.end }" var="num">
+    
+    <li class="page-item ${num == pageMaker.pageDTO.page? "active":"" }"><a class="page-link" href="${num}">${num }</a></li>
+    
+    </c:forEach>
+  
+  <c:if test="${pageMaker.next}">
+    <li class="page-item">
+      <a class="page-link" href="${pageMaker.end + 1 }">Next</a>
+    </li>
+    </c:if>
+  </ul>
+  
+  <form class='actionForm' action="/board/list" method="get">
+     <input type="hidden" name="page" value="${pageDTO.page}">
+     <input type="hidden" name="perSheet" value="${pageDTO.perSheet}">
+  </form>
+  
+  <script>
+  document.querySelector(".pagination").addEventListener("click" , e => {
+     
+     e.preventDefault()
+     
+     const target = e.target
+    // console.log(target)
+     const pageNum = target.getAttribute("href")
+     console.log(pageNum)
+     
+     document.querySelector(".actionForm input[name='page']").value=pageNum
+     document.querySelector(".actionForm").submit();
+  },false)
+  </script>
+                    
+<%@include file="../includes/footer.jsp" %>
+```
+
+7. BoardService
+```
+void register(BoardDTO boardDTO);
+```
+
+8.BoardServiceImpl
+```
+@Override
+public void register(BoardDTO boardDTO) {
+
+	Board vo = toDomain(boardDTO);
+	
+	mapper.insert(vo);
+		
+}
+```
+9. BoardMapper.java
+```
+void insert(Board board);
+```
+10. BoardMapper.xml
+```
+<insert id ="insert">
+	insert into tbl_board (title,content,writer)
+	values (#{title}, #{content}, #{writer})
+	</insert>
+```
+
+11. BoardController
+```
+@PostMapping(value = "/register", produces = {"text/plain"})
+@ResponseBody
+public ResponseEntity<String> registerPost(@RequestBody @Valid BoardDTO dto, BindingResult result) {
+		
+	log.info(dto);
+	
+	if(result.hasErrors()) {
+		log.info(result.getAllErrors());
+	
+		return new ResponseEntity<String>("fail", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	service.register(dto);
+	
+	return new ResponseEntity<String>("success", HttpStatus.OK);
+}
+```
+
+12. list표출
+```
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<%@include file="../includes/header.jsp" %>
+
+                    <!-- Page Heading -->
+                    <h1 class="h3 mb-4 text-gray-800">List Page</h1>
+                    
+<ul>
+	<c:forEach items="${list }" var="board">
+	<li>
+		<span><a class='listA' href='<c:out value="${board.bno }"/>'><c:out value="${board.bno }"/></a></span>
+		<c:out value="${board.title }"></c:out>
+	</li>
+	</c:forEach>
+</ul>
+
+
+
+<h3>${pageMaker}</h3>
+
+<ul class="pagination">
+   <c:if test="${pageMaker.prev}">
+    <li class="page-item">
+      <a class="page-link" href="${pageMaker.start - 1}" tabindex="-1">Previous</a>
+    </li>
+    </c:if>
+    
+    <c:forEach begin="${pageMaker.start }" end="${pageMaker.end }" var="num">
+    
+    <li class="page-item ${num == pageMaker.pageDTO.page? "active":"" }"><a class="page-link" href="${num}">${num }</a></li>
+    
+    </c:forEach>
+  
+  <c:if test="${pageMaker.next}">
+    <li class="page-item">
+      <a class="page-link" href="${pageMaker.end + 1 }">Next</a>
+    </li>
+    </c:if>
+  </ul>
+  
+  <form class='actionForm' action="/board/list" method="get">
+     <input type="hidden" name="page" value="${pageDTO.page}">
+     <input type="hidden" name="perSheet" value="${pageDTO.perSheet}">
+  </form>
+  
+  <script>
+  document.querySelector(".pagination").addEventListener("click" , e => {
+     
+     e.preventDefault()
+     
+     const target = e.target
+    // console.log(target)
+     const pageNum = target.getAttribute("href")
+     console.log(pageNum)
+     
+     document.querySelector(".actionForm input[name='page']").value=pageNum
+     document.querySelector(".actionForm").submit();
+  },false)
+  
+  
+  document.querySelectorAll('.listA').forEach(a => {
+        a.addEventListener("click", function (e) {
+            e.preventDefault()
+            const bno = e.target.getAttribute("href");
+            const actionForm = document.querySelector(".actionForm")
+            actionForm.setAttribute("action", "/board/read")
+            actionForm.innerHTML += "<input type='hidden' name='bno' value='"+bno+"'>";
+            actionForm.submit();
+        }, false);
+  });
+  </script>
+                    
+<%@include file="../includes/footer.jsp" %>
+```
