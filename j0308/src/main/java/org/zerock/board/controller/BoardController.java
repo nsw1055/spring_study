@@ -2,6 +2,8 @@ package org.zerock.board.controller;
 
 import javax.validation.Valid;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -44,17 +46,19 @@ public class BoardController {
 	
 	@PostMapping(value = "/register", produces = {"text/plain"})
 	@ResponseBody
-	//						@RequestBody: json데이터를 java의 객체로 변경해 주는 어노테이션
-	public String registerPost(@RequestBody @Valid BoardDTO dto, BindingResult result) {
+	//										@RequestBody: json데이터를 java의 객체로 변경해 주는 어노테이션
+	public ResponseEntity<String> registerPost(@RequestBody @Valid BoardDTO dto, BindingResult result) {
 		
 		log.info(dto);
 		
 		if(result.hasErrors()) {
 			log.info(result.getAllErrors());
 			
-			return "fail";
+			return new ResponseEntity<String>("fail", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		return "success";
+		service.register(dto);
+		
+		return new ResponseEntity<String>("success", HttpStatus.OK);
 	}
 }

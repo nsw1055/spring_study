@@ -12,6 +12,8 @@ public interface BoardService {
 	
 	List<BoardDTO> getPageList(PageDTO pageDTO);
 	
+	void register(BoardDTO boardDTO);
+	
 	default Board toDomain(BoardDTO dto) {
 		
 		return Board.builder().bno(dto.getBno())

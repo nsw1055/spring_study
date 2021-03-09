@@ -12,4 +12,6 @@ public interface BoardMapper {
 	List<Board> getList(@Param("skip") int skip, @Param("count") int count);
 	
 	int getTotalCount();
+	
+	void insert(Board board);
 }

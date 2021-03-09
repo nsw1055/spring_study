@@ -11,16 +11,16 @@ public class PageMaker {
 	private boolean next;
 	private int start;
 	private int end;
-	private PageDTO pageInfo;
+	private PageDTO pageDTO;
 	private int total;
 	
-	public PageMaker(PageDTO pageInfo, int total) {
+	public PageMaker(PageDTO pageDTO, int total) {
 		
 		this.total = total;
-		this.pageInfo = pageInfo;
+		this.pageDTO = pageDTO;
 		
 		//현재 페이지 번호
-		int currentPage = pageInfo.getPage();
+		int currentPage = pageDTO.getPage();
 		
 		//임시 마지막 번호
 		int tempEnd = (int)(Math.ceil(currentPage/10.0)*10);

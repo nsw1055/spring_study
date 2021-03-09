@@ -2,4 +2,5 @@
 <typeInfoHistroy>
     <typeInfo handle="=0302/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;org.zerock.service{MenuService.java[MenuService" modifiers="513" timestamp="1614650473813"/>
     <typeInfo handle="=j0308/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;org.zerock.time.service{TimeService.java[TimeService" modifiers="513" timestamp="1615171048273"/>
+    <typeInfo handle="=j0308/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;org.zerock.board.service{BoardService.java[BoardService" modifiers="513" timestamp="1615254777183"/>
 </typeInfoHistroy>
