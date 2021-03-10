@@ -1,4 +1,4 @@
-# 스프링 5, 6일차
+# 스프링 5일차
 
 * 게시판의 종류
 1. Form 태그 중심  
@@ -526,7 +526,7 @@ public class BoardTests {
 ```
 
 ---
-6일차  
+# 6일차  
 
 9. mapper수정
 ```
@@ -1038,4 +1038,54 @@ public ResponseEntity<String> registerPost(@RequestBody @Valid BoardDTO dto, Bin
   </script>
                     
 <%@include file="../includes/footer.jsp" %>
+```
+
+---
+# 7일차        
+
+* 오늘 목표  
+1. 검색 기능 -> like, 검색 처리 방법
+2. 화면 이동시 유지
+
+* 검색기능
+1. PageDTO.java 에 검색 타입과 키워드를 지정
+```
+private String type;
+	
+private String keyword;
+
+public String[] getArr() {
+	if(keyword == null || keyword.trim().length() == 0 ) {
+		return null;
+	}
+	if(type ==null) {
+		return null;
+	}
+	
+	return type.split("");
+}
+```
+
+2. BoardMapper.xml
+```
+<sql id='search'>
+		<where>
+			<if test="arr != null">
+				<foreach collection="arr" item="item" separator="OR"
+					open="(" close=")">
+
+					<if test="item == 't'.toString()">
+						title like concat('%', #{keyword}, '%')
+					</if>
+					<if test="item == 'c'.toString()">
+						content like concat('%', #{keyword}, '%')
+					</if>
+					<if test="item == 'w'.toString()">
+						writer like concat('%', #{keyword}, '%')
+					</if>
+
+				</foreach>
+			</if>
+		</where>
+	</sql>
 ```
