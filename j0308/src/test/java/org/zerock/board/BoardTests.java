@@ -1,5 +1,8 @@
 package org.zerock.board;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,8 @@ public class BoardTests {
 	@Test
 	public void testList() {
 		
-		mapper.getList(10, 10).forEach(b -> log.info(b));
+		service.getPageList(PageDTO.builder().page(1).type("tcw").keyword("10").build())
+		.forEach(dto -> log.info(dto));
 	}
 	
 	@Test
@@ -36,4 +40,11 @@ public class BoardTests {
 		service.getPageList(PageDTO.builder().page(2).build())
 		.forEach(dto -> log.info(dto));
 	}
+//	@Test
+//	public void testEx1() {
+//		
+//		PageDTO dto = new PageDTO();
+//		
+//		mapper.ex1(dto).forEach(board -> log.info(board));
+//	}
 }

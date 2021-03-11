@@ -29,12 +29,19 @@ public class BoardController {
 	
 	private final BoardService service;
 	
+	@GetMapping({"/read"})
+	public void read(PageDTO pageDTO, Integer bno, Model model) {
+		log.info("bno: "+bno);
+		log.info("pageDTO: "+pageDTO);
+		model.addAttribute("board", service.readOne(bno));
+	}
+	 
 	@GetMapping({"/", "/list"})
 	public String list(@ModelAttribute("pageDTO") PageDTO pageDTO, Model model) {
 		log.info("list.........................");
 		
 		model.addAttribute("list", service.getPageList(pageDTO));
-		model.addAttribute("pageMaker", new PageMaker(pageDTO, service.getTotalCount()));
+		model.addAttribute("pageMaker", new PageMaker(pageDTO, service.getTotalCount(pageDTO)));
 		//mockMVC
 		return "/board/list";
 	}

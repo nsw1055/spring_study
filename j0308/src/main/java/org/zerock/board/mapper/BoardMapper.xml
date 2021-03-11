@@ -3,12 +3,84 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.zerock.board.mapper.BoardMapper">
-	<select id = "getTotalCount" resultType="int">
-		select count(bno) from tbl_board 
+
+	<sql id='search'>
+		<where>
+			<if test="arr != null">
+				<foreach collection="arr" item="item" separator="OR"
+					open="(" close=")">
+
+					<if test="item == 't'.toString()">
+						title like concat('%', #{keyword}, '%')
+					</if>
+					<if test="item == 'c'.toString()">
+						content like concat('%', #{keyword}, '%')
+					</if>
+					<if test="item == 'w'.toString()">
+						writer like concat('%', #{keyword}, '%')
+					</if>
+
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+	<select id="getTotalCount" resultType="int">
+		select count(bno) from tbl_board
+		<include refid="search"></include>
+		
 	</select>
-	
-	<insert id ="insert">
-	insert into tbl_board (title,content,writer)
-	values (#{title}, #{content}, #{writer})
+
+	<insert id="insert">
+		insert into tbl_board (title,content,writer)
+		values
+		(#{title}, #{content}, #{writer})
 	</insert>
+
+	<select id="getList" resultType="org.zerock.board.domain.Board">
+		select * from tbl_board
+		<where>
+			<if test="arr != null">
+				<foreach collection="arr" item="item" separator="OR"
+					open="(" close=")">
+
+					<if test="item == 't'.toString()">
+						title like concat('%', #{keyword}, '%')
+					</if>
+					<if test="item == 'c'.toString()">
+						content like concat('%', #{keyword}, '%')
+					</if>
+					<if test="item == 'w'.toString()">
+						writer like concat('%', #{keyword}, '%')
+					</if>
+
+				</foreach>
+			</if>
+		</where>
+		order by bno desc
+		limit #{skip}, #{count}
+
+	</select>
+
+
+	<select id="ex1" resultType="org.zerock.board.domain.Board">
+		select * from tbl_board
+		<where>
+			<if test="map != null">
+				<!-- collection에 대해 반복처리 값, 키, 분리기호 -->
+				<foreach collection="map" item="item" index="key"
+					separator="OR" open="(" close=")">
+					<if test="key == 't'.toString()">
+						title like #{item}
+					</if>
+				</foreach>
+			</if>
+		</where>
+		limit 0,10
+	</select>
+
+
+<select id="selectOne" resultType="org.zerock.board.domain.Board">
+select * from tbl_board where bno = #{bno}
+</select>
 </mapper>
